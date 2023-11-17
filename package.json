@@ -1,27 +1,22 @@
 {
-    "name": "projectpragati",
-    "version": "1.0.0",
-    "description": "",
-    "main": "index.js",
-    "scripts": {
-        "start": "node src/index.js",
-        "dev": "nodemon src/index.js"
-    },
-    "type": "module",
-    "author": "Parth Kalra",
-    "license": "ISC",
-    "dependencies": {
-        "dotenv": "^16.3.1",
-        "express": "^4.18.2",
-        "mongoose": "^8.0.1"
-    },
-    "prettier": {
-        "trailingComma": "es5",
-        "tabWidth": 4,
-        "semi": true,
-        "singleQuote": false
-    },
-    "devDependencies": {
-        "nodemon": "^3.0.1"
-    }
+  "name": "projectpragati",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon -r dotenv/config  --experimental-json-modules src/index.js"
+  },
+  "type": "module",
+  "author": "Parth Kalra",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "mongoose": "^8.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "prettier": "^3.1.0"
+  }
 }
