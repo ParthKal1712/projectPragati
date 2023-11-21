@@ -1,4 +1,4 @@
-//WE HAVE TO BUILD A WRAPPER FUNCTION THAT WILL HELP US HANDLE ASYNC FUNCTIONS.
+//WE HAVE TO BUILD A WRAPPER FUNCTION THAT WILL HELP US HANDLE ERRORS IN ASYNC FUNCTIONS.
 
 //THEREFORE, WE NEED A FUNCTION THAT TAKES IN A FUNCTION AS AN ARGUMENT AND RUNS IT ASYNCHRONOUSLY.
 
@@ -8,23 +8,24 @@
 //const asyncHandler = (func) => () => {};
 //const asyncHandler = (func) => async () => {};
 
-const asyncHandler = (FN) => async (req, res, next) => {
-  try {
-    await fn(req, res, next);
-  } catch (error) {
-    res
-      .status(error.code || 500)
-      .json({ success: false, message: error.message });
-  }
-};
+// const asyncHandler = (fn) => async (req, res, next) => {
+//     try {
+//         await fn(req, res, next)
+//     } catch (error) {
+//         res.status(err.code || 500).json({
+//             success: false,
+//             message: err.message
+//         })
+//     }
+// }
 
-//ANOTHER WAY OF DOING THE SAME THING - THE PROMISE WAY
-// const asyncHandler = (requestHandler) => {
-//   (req, res, next) => {
-//     Promise.resolve(requestHandler(req, res, next)).catch((error) =>
-//       next(error)
-//     );
-//   };
-// };
+// ANOTHER WAY OF DOING THE SAME THING - THE PROMISE WAY
+const asyncHandler = (requestHandler) => {
+  return (req, res, next) => {
+    Promise.resolve(requestHandler(req, res, next)).catch((error) =>
+      next(error)
+    );
+  };
+};
 
 export { asyncHandler };

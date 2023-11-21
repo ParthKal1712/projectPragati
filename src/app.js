@@ -20,4 +20,10 @@ app.use(express.static("public"));
 //TO BE ABLE TO PARSE COOKIES
 app.use(cookieParser());
 
+//IMPORTING ROUTES
+import userRouter from "./routes/user.route.js";
+
+//USING ROUTES (ie. SENDING REQUESTS TO THEIR CORRECT ROUTER.)
+app.use("/api/v1/users", userRouter);
+
 export { app };

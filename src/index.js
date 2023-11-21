@@ -9,14 +9,14 @@ dotenv.config({ path: "./env" });
 connectDB()
   .then(() => {
     //BEFORE STARTING LISTENING FOR THE USER, WE WILL CHECK IF THERE WAS AN ERROR WHILE CONNECTING TO THE APP
-    app.on("error", (error) => {
-      console.log("ERROR:", error);
-      process.exit(1);
-    });
+    // app.on("error", (error) => {
+    //   console.log("ERROR:", error);
+    //   process.exit(1);
+    // });
 
     //NOW THAT WE ARE SURE THERES IS NO ERROR, WE START LISTENING FOR THE USER
     app.listen(process.env.PORT, () => {
-      console.log(`Server running. Use our API on port: ${process.env.PORT}`);
+      console.log(`Server running on port: ${process.env.PORT}`);
     });
   })
   .catch((error) => {
