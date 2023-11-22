@@ -79,11 +79,11 @@ userSchema.methods.generateRefreshToken = function () {
 };
 
 //THIS IS A MIDDLEWARE THAT WILL BE CALLED EVERY TIME BEFORE THE DOCUMENT IS SAVED
-userSchema.pre("save", function (next) {
+userSchema.pre("save", async function (next) {
   //CHECK IF THE PASSWORD IS MODIFIED
   if (this.isModified("password")) {
     //IF IT IS MODIFIED, ENCRYPT THE NEW PASSWORD
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
   }
 
   //CALL THE NEXT MIDDLEWARE OR MOVE ALONG..
