@@ -15,13 +15,13 @@ const registerUser = asyncHandler(async (req, res) => {
   if (
     [fullName, username, email, password].some((item) => item.trim() === "")
   ) {
-    throw new ApiError(400, "All fields are required");
+    throw new ApiError(400, "All fields are required.");
   }
 
   //CHECK IF USERNAME OR EMAIL ALREADY EXISTS. IF YES, THROW AN ERROR
   const userExists = await User.findOne({ $or: [{ username }, { email }] });
   if (userExists) {
-    throw new ApiError(409, "User already exists");
+    throw new ApiError(409, "User already exists.");
   }
 
   //IF WE HAVEN'T RECEIVED ANY FILES IN THE REQUEST, THROW AN ERROR
@@ -32,7 +32,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //THROW AN ERROR IF AVATAR IS NOT RECEIVED
   var avatarLocalPath;
   if (!req.files.avatar) {
-    throw new ApiError(400, "Avatar is required");
+    throw new ApiError(400, "Avatar is required.");
   } else {
     avatarLocalPath = req.files.avatar[0].path;
   }
@@ -46,6 +46,11 @@ const registerUser = asyncHandler(async (req, res) => {
 
   //UPLOAD IMAGES TO CLOUDINARY
   const avatar = await uploadOnCloudinary(avatarLocalPath);
+
+  //LOOK AT THE RESPONSE RECEIVED FROM CLOUDINARY TO CONFIRM THAT THE AVATAR WAS LOADED
+  if (!avatar) {
+    throw new ApiError(500, "Unable to upload avatar.");
+  }
 
   //CREATE USER OBJECT
   const user = await User.create({
@@ -70,7 +75,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //RETURN RESPONSE
   return res
     .status(201)
-    .json(new ApiResponse(200, createdUser, "User registered successfully"));
+    .json(new ApiResponse(200, createdUser, "User registered successfully."));
 });
 
 export { registerUser };
