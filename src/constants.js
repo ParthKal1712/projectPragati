@@ -1,1 +1,1 @@
-export const DB_NAME = "pragatiDB";
+export const DB_NAME = "Cluster0";

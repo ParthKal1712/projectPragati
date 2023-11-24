@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
-dotenv.config({ path: "./env" });
+dotenv.config({ path: "./.env" });
 
 //BECAUSE CONNECTDB CONTAINS AN AWAIT FUNCTION, IT WILL RETURN A PROMISE. SO, WE CAN CATCH THAT PROMISE USING THEN.
 connectDB()

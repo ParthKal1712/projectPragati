@@ -1,14 +1,14 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.model.js";
-import uploadOnCloudinary from "../utils/cloudinary.js";
+//import uploadOnCloudinary from "../utils/cloudinary.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
 //DEFINING METHODS IN THE CONTROLLER
 const registerUser = asyncHandler(async (req, res) => {
   //GET USER DETAILS FROM FRONTEND
   const { fullName, username, email, password } = req.body;
-  console.log("email: " + JSON.stringify(req.body));
 
   //CHECKING DATA BY APPLYING VALIDATIONS
   //IF AFTER TRIMMING - FULLNAME, USERNAME, EMAIL OR PASSWORD IS EMPTY, THROW AN ERROR
@@ -24,20 +24,28 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(409, "User already exists");
   }
 
+  //IF WE HAVEN'T RECEIVED ANY FILES IN THE REQUEST, THROW AN ERROR
+  if (JSON.stringify(req.files) === "{}") {
+    throw new ApiError(400, "No files received.");
+  }
+
+  //THROW AN ERROR IF AVATAR IS NOT RECEIVED
+  var avatarLocalPath;
+  if (!req.files.avatar) {
+    throw new ApiError(400, "Avatar is required");
+  } else {
+    avatarLocalPath = req.files.avatar[0].path;
+  }
+
+  //PICK COVER IMAGE IF IT IS RECEIVED
+  var coverImage = null;
+  if (req.files.coverImage) {
+    let coverImageLocalPath = req.files.coverImage[0].path;
+    coverImage = await uploadOnCloudinary(coverImageLocalPath);
+  }
+
   //UPLOAD IMAGES TO CLOUDINARY
-  const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar is required");
-  }
-
   const avatar = await uploadOnCloudinary(avatarLocalPath);
-  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
-  if (!avatar) {
-    throw new ApiError(400, "Avatar is required");
-  }
 
   //CREATE USER OBJECT
   const user = await User.create({
@@ -62,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //RETURN RESPONSE
   return res
     .status(201)
-    .json(ApiResponse(200, createdUser, "User registered successfully"));
+    .json(new ApiResponse(200, createdUser, "User registered successfully"));
 });
 
 export { registerUser };
