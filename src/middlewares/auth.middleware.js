@@ -1,7 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 
 //THIS MIDDLEWARE TAKES ANY REQUEST COMING FROM THE FRONTEND AND AUTHENTICATES IT WITH JWT (USING accessToken THAT IS SAVED IN THE USER'S COOKIES DURING LOGIN)
 
@@ -21,7 +21,7 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     //USING THE USER ID GIVEN IN THE DECODED ACCESS TOKEN, FIND THE APPROPRIATE USER FROM THE DB
-    const user = await User.findbyId(decodedToken._id).select(
+    const user = await User.findById(decodedToken._id).select(
       "-password -refreshToken"
     );
 

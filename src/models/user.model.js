@@ -10,36 +10,36 @@ const userSchema = new mongoose.Schema(
       unique: true,
       lowercase: true,
       trim: true,
-      index: true,
+      index: true
     },
     password: {
       type: String,
-      required: true,
+      required: true
     },
     fullName: {
       type: String,
       required: true,
       index: true,
-      trim: true,
+      trim: true
     },
     email: {
       type: String,
-      required: true,
+      required: true
     },
     avatar: {
       type: String, //image url
-      required: true,
+      required: true
     },
     coverImage: {
-      type: String, //image url
+      type: String //image url
     },
     watchHistory: {
       type: [mongoose.Schema.Types.ObjectId],
-      ref: "Video",
+      ref: "Video"
     },
     refreshToken: {
-      type: String,
-    },
+      type: String
+    }
   },
   { timestamps: true }
 );
@@ -57,11 +57,11 @@ userSchema.methods.generateAccessToken = function () {
       _id: this._id,
       email: this.email,
       username: this.username,
-      fullName: this.fullName,
+      fullName: this.fullName
     },
     process.env.ACCESS_TOKEN_SECRET,
     {
-      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY
     }
   );
 };
@@ -69,11 +69,11 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
   return jwt.sign(
     {
-      _id: this._id,
+      _id: this._id
     },
     process.env.REFRESH_TOKEN_SECRET,
     {
-      expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
+      expiresIn: process.env.REFRESH_TOKEN_EXPIRY
     }
   );
 };
