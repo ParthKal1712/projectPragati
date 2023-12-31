@@ -339,6 +339,16 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedUser, "Avatar updated successfully."));
 });
 
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user?._id)
+      }
+    }
+  ]);
+});
+
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user?._id);
 
