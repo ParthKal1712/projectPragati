@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import { reset } from "nodemon";
 
 //METHOD TO GENERATE REFRESH AND ACCESS TOKENS
 //WE USE async AND NOT asyncHandler BECAUSE WE ARE NOT HANDLING AN EXTERNAL WEB REQUEST HERE, SO THAT WOULD BE AN OVERKILL
@@ -32,6 +33,14 @@ const generateAccessAndRefreshTokens = async (userId) => {
     );
   }
 };
+
+//THIS FUNCTION CAN BE CALLED BY FRONTEND TO CHECK WHICH USER IS LOGGED IN
+const getCurrentUser = asyncHandler(async (req, res) => {
+  //RETURN THE USER DATA
+  return res
+    .status(200)
+    .json(new ApiResponse(200, req.user, "User details fetched successfully."));
+});
 
 //DEFINING METHODS IN THE CONTROLLER
 const registerUser = asyncHandler(async (req, res) => {
@@ -246,4 +255,129 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Old Password is incorrect");
+  }
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password Changed Successfully."));
+});
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  //THIS FUNCTION CAN BE CALLED BY FRONTEND TO UPDATE USER DETAILS
+  //GET USER DETAILS FROM FRONTEND
+  const { fullName, username, email } = req.body;
+
+  //FRONT END SHOULD SEND ALL FIELDS THAT ARE REQUIRED. IF NOT, THROW AN ERROR
+  if (!fullName || !username || !email) {
+    throw new ApiError(400, "All fields are required.");
+  }
+
+  //UPDATING THE USER DATA
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      //REMOVING THE refreshToken FROM THE DB FOR THE SAID USER
+      $set: {
+        fullName,
+        username,
+        email
+      }
+    },
+    //WE NEED TO USE THE NEW KEYWORD TO MAKE SURE THAT THIS STATEMENT RETURNS THE UPDATED DOCUMENT
+    {
+      new: true
+    }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user, "Account details updated successfully."));
+});
+
+const updateUserAvatar = asyncHandler(async (req, res) => {
+  //WE DIRECTLY ACCESS THE req.user? OBJECT. IF IT IS MISSING AND WE TRY TO ACCESS IT, IT WILL THROW AN ERROR
+  const user = await User.findById(req.user?._id);
+
+  const newAvatarLocalPath = req.file?.avatar[0].path;
+
+  if (!newAvatarLocalPath) {
+    throw new ApiError(400, "File not found");
+  }
+
+  const avatar = await uploadOnCloudinary(newAvatarLocalPath);
+
+  if (!avatar) {
+    throw new ApiError(500, "Unable to upload avatar.");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: {
+        avatar: avatar.url
+      }
+    },
+    {
+      new: true
+    }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Avatar updated successfully."));
+});
+
+const updateUserCoverImage = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.user?._id);
+
+  const newCoverImageLocalPath = req.file?.coverImage[0].path;
+
+  if (!newCoverImageLocalPath) {
+    throw new ApiError(400, "File not found");
+  }
+
+  const coverImage = await uploadOnCloudinary(newCoverImageLocalPath);
+
+  if (!coverImage) {
+    throw new ApiError(500, "Unable to upload cover image.");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    user._id,
+    {
+      $set: {
+        coverImage: coverImage.url
+      }
+    },
+    {
+      new: true
+    }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedUser, "Avatar updated successfully."));
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  changeCurrentPassword,
+  refreshAccessToken,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage
+};
